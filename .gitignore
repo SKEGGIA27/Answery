@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Chrome Extension
+*.pem
+*.crx
+*.zip
+
+# Node (if ever added)
+node_modules/
+
+# Source assets (not needed in the extension)
+icons/original.png

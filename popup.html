@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Answery</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Answery</h1>
+      <div id="status" class="status-msg"></div>
+    </header>
+
+    <main>
+      <div class="settings-container">
+
+        <div class="cattura-schermo-area">
+          <button id="captureBtn" class="primary-btn full-width">
+            Capture Area
+          </button>
+          <p class="hint">Select any area on screen to get an instant answer</p>
+        </div>
+
+        <div id="guiResponseContainer" class="gui-response-container" style="display: none;">
+          <div class="response-header">
+            <span>Answer</span>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <button id="copyResponseBtn" class="response-action-btn" title="Copy to clipboard">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+              <button id="clearResponseBtn" class="response-action-btn" title="Clear response">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div id="guiResponseText" class="response-text"></div>
+        </div>
+
+        <button id="settingsToggle" class="settings-toggle">
+          <span>Settings</span>
+          <span class="arrow">▼</span>
+        </button>
+
+        <div id="settingsContent" class="settings-content">
+          <div class="settings-group">
+            <label for="modelSelect">AI Provider</label>
+            <div class="select-wrapper">
+              <select id="modelSelect">
+                <option value="gemini">Google Gemini</option>
+                <option value="chatgpt">OpenAI ChatGPT (Soon)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="geminiModelGroup" class="settings-group">
+            <label for="geminiModelSelect">Gemini Model</label>
+            <div class="select-wrapper">
+              <select id="geminiModelSelect">
+                <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
+                <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <label for="apiKey">API Key</label>
+            <input type="password" id="apiKey" placeholder="Paste your Gemini API key here">
+          </div>
+
+          <div class="settings-group">
+            <label for="presetMessage">Custom Instructions</label>
+            <textarea id="presetMessage" rows="2"
+              placeholder="e.g. Tell me the correct answer for this question"></textarea>
+          </div>
+
+          <div class="settings-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label for="quickButton" style="margin: 0;">Quick Capture Button</label>
+              <p class="setting-desc">Show a floating button on web pages for instant access</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="quickButton">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-group">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="stealthMode" style="margin: 0;">Stealth Mode</label>
+                <p class="setting-desc">Results appear nearly invisible — hover to reveal</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="stealthMode">
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <div id="transparencyControl" style="margin-top: 8px; display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="stealthTransparency" style="font-size: 11px; margin: 0;">Popup Transparency</label>
+                <span id="transparencyValue" style="font-size: 11px; color: rgba(255,255,255,0.7);">5%</span>
+              </div>
+              <input type="range" id="stealthTransparency" min="0" max="100" value="5" style="width: 100%;">
+            </div>
+          </div>
+
+          <div class="settings-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label for="hidePopup" style="margin: 0;">In-App Results Only</label>
+              <p class="setting-desc">Show answers inside the extension instead of on the page</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="hidePopup">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-group">
+            <label for="duration">Result display time (sec)</label>
+            <input type="number" id="duration" min="1" max="60" value="5">
+          </div>
+
+          <p class="disclaimer">
+            NOTE: In Stealth Mode, use <strong>⌘+Shift+Y (Mac) or Ctrl+Shift+Y (Windows)</strong> to start a capture. The result popup is only visible on
+            hover.
+          </p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
