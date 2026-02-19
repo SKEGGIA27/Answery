@@ -10,12 +10,11 @@
 
 <body>
   <div class="container">
-    <header>
-      <h1>Answery</h1>
-      <div id="status" class="status-msg"></div>
-    </header>
-
     <main>
+      <div class="glass-title-area">
+        <h1 class="glass-title">Answery</h1>
+        <div id="status" class="status-msg"></div>
+      </div>
       <div class="settings-container">
 
         <div class="cattura-schermo-area">
@@ -114,7 +113,7 @@
             <div id="transparencyControl" style="margin-top: 8px; display: none;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <label for="stealthTransparency" style="font-size: 11px; margin: 0;">Popup Transparency</label>
-                <span id="transparencyValue" style="font-size: 11px; color: rgba(255,255,255,0.7);">5%</span>
+                <span id="transparencyValue" style="font-size: 11px; color: rgba(0,0,0,0.5);">5%</span>
               </div>
               <input type="range" id="stealthTransparency" min="0" max="100" value="5" style="width: 100%;">
             </div>
@@ -137,7 +136,8 @@
           </div>
 
           <p class="disclaimer">
-            NOTE: In Stealth Mode, use <strong>⌘+Shift+Y (Mac) or Ctrl+Shift+Y (Windows)</strong> to start a capture. The result popup is only visible on
+            NOTE: In Stealth Mode, use <strong>⌘+Shift+Y (Mac) or Ctrl+Shift+Y (Windows)</strong> to start a capture.
+            The result popup is only visible on
             hover.
           </p>
         </div>
