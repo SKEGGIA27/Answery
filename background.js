@@ -59,6 +59,67 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Restore original icon
     drawBadgeIcon(false);
     sendResponse({ success: true });
+  } else if (request.action === 'DETECT_FORM') {
+    // Forward form detection to content script
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0];
+      if (!activeTab) {
+        sendResponse({ isForm: false });
+        return;
+      }
+      // Try sending message — inject script if needed
+      chrome.tabs.sendMessage(activeTab.id, { action: 'DETECT_FORM' }, (response) => {
+        if (chrome.runtime.lastError) {
+          // Content script not injected yet — inject and retry
+          chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ['content.js']
+          }, () => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ isForm: false });
+              return;
+            }
+            chrome.scripting.insertCSS({
+              target: { tabId: activeTab.id },
+              files: ['content.style.css']
+            });
+            chrome.tabs.sendMessage(activeTab.id, { action: 'DETECT_FORM' }, (r) => {
+              sendResponse(r || { isForm: false });
+            });
+          });
+        } else {
+          sendResponse(response || { isForm: false });
+        }
+      });
+    });
+    return true;
+  } else if (request.action === 'SOLVE_FORM') {
+    // Orchestrate: scrape → AI → (optionally) auto-click
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0];
+      if (!activeTab) {
+        sendResponse({ success: false, error: 'No active tab' });
+        return;
+      }
+
+      // Step 1: Scrape questions from the page
+      chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_FORM' }, (scrapeResponse) => {
+        if (chrome.runtime.lastError || !scrapeResponse || !scrapeResponse.questions) {
+          sendResponse({ success: false, error: 'Failed to scrape form questions' });
+          return;
+        }
+
+        const questions = scrapeResponse.questions;
+        if (questions.length === 0) {
+          sendResponse({ success: false, error: 'No text questions found on this form' });
+          return;
+        }
+
+        // Step 2: Send to AI
+        analyzeFormQuestions(questions, request.autoClick, activeTab.id, sendResponse);
+      });
+    });
+    return true;
   }
 });
 
@@ -140,6 +201,121 @@ async function analyzeImage(payload, sendResponse) {
 
   } catch (error) {
     console.error("[Background] Analysis API Error:", error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
+  try {
+    // Get settings
+    const settings = await chrome.storage.local.get(['model', 'geminiModel', 'apiKey']);
+    const apiKey = settings.apiKey;
+
+    if (!apiKey) {
+      sendResponse({ success: false, error: 'No API Key configured. Open Answery settings to add one.' });
+      return;
+    }
+
+    // Build text prompt from scraped questions
+    let promptText = 'You are given a list of multiple-choice questions. For each question, identify the correct answer.\n\n';
+    promptText += 'IMPORTANT: Respond ONLY with a valid JSON array. No explanation, no markdown, no extra text.\n';
+    promptText += 'Format: [{"question": <question_index>, "answer": <option_index>}]\n';
+    promptText += 'Where question_index is the question number (starting from 0) and answer is the 0-based index of the correct option.\n\n';
+
+    questions.forEach((q, i) => {
+      promptText += `Question ${i} : ${q.text}\n`;
+      q.options.forEach((opt, j) => {
+        promptText += `  ${j}) ${opt.text}\n`;
+      });
+      promptText += '\n';
+    });
+
+    promptText += '\nRespond ONLY with the JSON array. Example: [{"question":0,"answer":1},{"question":1,"answer":0}]';
+
+    const selectedModel = settings.geminiModel || 'gemini-3-flash-preview';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+    const body = {
+      contents: [{
+        parts: [{ text: promptText }]
+      }]
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('[Background] Gemini Form Error:', data);
+      throw new Error(data.error?.message || `Gemini Error ${response.status}`);
+    }
+
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Parse JSON from response (handle possible markdown code blocks)
+    let jsonStr = rawText.trim();
+    // Remove markdown code block wrappers if present
+    jsonStr = jsonStr.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+
+    let aiAnswers;
+    try {
+      aiAnswers = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('[Background] Failed to parse AI JSON response:', jsonStr);
+      // Fallback: return raw text
+      sendResponse({ success: true, text: rawText, formatted: rawText });
+      return;
+    }
+
+    // Build formatted text for display
+    let formattedText = '';
+    aiAnswers.forEach((a) => {
+      const q = questions[a.question];
+      if (q) {
+        const opt = q.options[a.answer];
+        formattedText += `Q${a.question + 1}: ${q.text}\n→ ${opt ? opt.text : 'Unknown'}\n\n`;
+      }
+    });
+
+    // Build answers array for auto-click (map AI answer indices to DOM indices)
+    const clickData = aiAnswers.map((a) => {
+      const q = questions[a.question];
+      return {
+        questionIndex: q ? q.index : -1,
+        optionIndex: a.answer
+      };
+    }).filter(a => a.questionIndex >= 0);
+
+    // Step 3: Auto-click if enabled
+    if (autoClick && clickData.length > 0) {
+      chrome.tabs.sendMessage(tabId, { action: 'APPLY_ANSWERS', answers: clickData });
+    }
+
+    // Step 4: Display results based on hidePopup setting
+    const displaySettings = await chrome.storage.local.get(['hidePopup', 'duration']);
+
+    if (displaySettings.hidePopup) {
+      // Show inside extension popup
+      chrome.storage.local.set({ latestResponse: formattedText.trim() });
+      chrome.runtime.sendMessage({ action: 'SET_BADGE' });
+      sendResponse({ success: true, text: formattedText.trim(), showInPopup: true });
+    } else {
+      // Show as floating popup on the page (like capture mode)
+      const duration = displaySettings.duration || 10;
+      chrome.tabs.sendMessage(tabId, {
+        action: 'SHOW_RESPONSE',
+        text: formattedText.trim(),
+        duration: duration
+      });
+      sendResponse({ success: true, text: formattedText.trim(), showInPopup: false });
+    }
+
+  } catch (error) {
+    console.error('[Background] Form Analysis Error:', error);
     sendResponse({ success: false, error: error.message });
   }
 }

@@ -14,14 +14,106 @@ function initializeContentScript() {
     let confirmPopup = null;
     let responsePopup = null;
     let responseTimer = null;
+    let requestCancelled = false;
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'ACTIVATE_SELECTION') {
             createOverlay();
         } else if (request.action === 'SHOW_RESPONSE') {
             showResponsePopup(request.text, request.duration);
+        } else if (request.action === 'DETECT_FORM') {
+            sendResponse({ isForm: detectForm() });
+            return true;
+        } else if (request.action === 'SCRAPE_FORM') {
+            sendResponse({ questions: scrapeFormQuestions() });
+            return true;
+        } else if (request.action === 'APPLY_ANSWERS') {
+            applyAnswers(request.answers);
+            sendResponse({ success: true });
+            return true;
         }
     });
+
+    // ===== Form Solver Functions =====
+
+    function detectForm() {
+        const url = window.location.href.toLowerCase();
+        return url.includes('forms.office.com') || url.includes('forms.microsoft.com');
+    }
+
+    function scrapeFormQuestions() {
+        const questions = [];
+        const questionItems = document.querySelectorAll('[data-automation-id="questionItem"]');
+
+        questionItems.forEach((item, index) => {
+            // Check for images — skip if found
+            const images = item.querySelectorAll('img');
+            if (images.length > 0) return;
+
+            // Get question text
+            const titleEl = item.querySelector('[data-automation-id="questionTitle"]');
+            if (!titleEl) return;
+
+            // Extract text, removing the ordinal number (e.g. "1.")
+            const ordinalEl = titleEl.querySelector('[data-automation-id="questionOrdinal"]');
+            let questionText = titleEl.innerText.trim();
+            if (ordinalEl) {
+                questionText = questionText.replace(ordinalEl.innerText, '').trim();
+            }
+
+            if (!questionText) return;
+
+            // Get choices
+            const choiceItems = item.querySelectorAll('[data-automation-id="choiceItem"]');
+            if (choiceItems.length === 0) return; // Skip non-choice questions (e.g. text input)
+
+            const options = [];
+            choiceItems.forEach((choice, optIndex) => {
+                const label = choice.querySelector('label');
+                const input = choice.querySelector('input[type="radio"], input[type="checkbox"]');
+                if (label) {
+                    options.push({
+                        text: label.innerText.trim(),
+                        optionIndex: optIndex
+                    });
+                }
+            });
+
+            if (options.length > 0) {
+                questions.push({
+                    index: index,
+                    text: questionText,
+                    options: options
+                });
+            }
+        });
+
+        return questions;
+    }
+
+    function applyAnswers(answers) {
+        const questionItems = document.querySelectorAll('[data-automation-id="questionItem"]');
+
+        answers.forEach((answer, i) => {
+            setTimeout(() => {
+                const questionItem = questionItems[answer.questionIndex];
+                if (!questionItem) return;
+
+                const choiceItems = questionItem.querySelectorAll('[data-automation-id="choiceItem"]');
+                const targetChoice = choiceItems[answer.optionIndex];
+                if (!targetChoice) return;
+
+                // Click the input or label
+                const input = targetChoice.querySelector('input[type="radio"], input[type="checkbox"]');
+                if (input) {
+                    input.click();
+                } else {
+                    const label = targetChoice.querySelector('label');
+                    if (label) label.click();
+                }
+            }, i * 100); // 100ms delay between each click
+        });
+    }
 
     function createOverlay() {
         if (selectionOverlay) {
@@ -212,7 +304,7 @@ function initializeContentScript() {
     }
 
     function restoreOverlayForLoading() {
-
+        requestCancelled = false;
         removeOverlay(); // Remove selection UI
         // Show temporary loader
         showResponsePopup("Getting response...", 999, true);
@@ -235,6 +327,9 @@ function initializeContentScript() {
             };
 
             chrome.runtime.sendMessage({ action: 'ANALYZE_IMAGE', payload: payload }, (response) => {
+                // If user cancelled during loading, ignore the response
+                if (requestCancelled) return;
+
                 if (response.success) {
 
                     if (settings.hidePopup) {
@@ -288,6 +383,8 @@ function initializeContentScript() {
 
         responsePopup.querySelector('.ai-close-btn').addEventListener('click', () => {
             if (responseTimer) clearTimeout(responseTimer);
+            // If closing during loading, cancel the pending request
+            if (isLoading) requestCancelled = true;
             responsePopup.remove();
             responsePopup = null;
         });

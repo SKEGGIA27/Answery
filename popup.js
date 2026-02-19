@@ -113,6 +113,57 @@ document.addEventListener('DOMContentLoaded', () => {
     updateVisibility();
   });
 
+  // ===== Form Solver Logic =====
+  const formSolverArea = document.getElementById('formSolverArea');
+  const solveFormBtn = document.getElementById('solveFormBtn');
+  const autoClickCheckbox = document.getElementById('autoClickAnswers');
+
+  // Detect if current page is a Microsoft Forms page
+  chrome.runtime.sendMessage({ action: 'DETECT_FORM' }, (response) => {
+    if (chrome.runtime.lastError) return;
+    if (response && response.isForm) {
+      if (formSolverArea) formSolverArea.style.display = 'flex';
+    }
+  });
+
+  // Solve Form button handler
+  if (solveFormBtn) {
+    solveFormBtn.addEventListener('click', () => {
+      solveFormBtn.disabled = true;
+      solveFormBtn.innerHTML = 'Solving...';
+
+      const autoClick = autoClickCheckbox ? autoClickCheckbox.checked : false;
+
+      chrome.runtime.sendMessage({ action: 'SOLVE_FORM', autoClick: autoClick }, (response) => {
+        if (chrome.runtime.lastError) {
+          solveFormBtn.disabled = false;
+          solveFormBtn.innerHTML = 'Solve Form';
+          statusMsg.textContent = 'Error: ' + chrome.runtime.lastError.message;
+          return;
+        }
+
+        if (response && response.success) {
+          if (response.showInPopup) {
+            // Show inside extension popup
+            solveFormBtn.disabled = false;
+            solveFormBtn.innerHTML = 'Solve Form';
+            showGuiResponse(response.text);
+            statusMsg.textContent = autoClick ? 'Answers applied!' : 'Answers ready';
+            setTimeout(() => { statusMsg.textContent = ''; }, 3000);
+          } else {
+            // Response shown on page — close popup (like capture mode)
+            window.close();
+          }
+        } else {
+          solveFormBtn.disabled = false;
+          solveFormBtn.innerHTML = 'Solve Form';
+          statusMsg.textContent = response ? response.error : 'Unknown error';
+          setTimeout(() => { statusMsg.textContent = ''; }, 5000);
+        }
+      });
+    });
+  }
+
   // Transparency Input Listener
   if (transparencyInput) {
     transparencyInput.addEventListener('input', (e) => {
@@ -197,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Disable button to prevent double clicks
     captureBtn.disabled = true;
-    captureBtn.innerHTML = '<span class="icon">⏳</span> Starting...';
+    captureBtn.innerHTML = 'Starting...';
 
     // Save current settings immediately before capturing
     const settings = {

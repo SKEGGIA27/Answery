@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-6c5ce7?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.1.0-6c5ce7?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/manifest-v3-a29bfe?style=flat-square" alt="Manifest V3">
   <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=flat-square" alt="Google Gemini">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
@@ -21,6 +21,8 @@
 
 **Answery** is a Chrome extension that lets you select any region of your screen, capture it, and instantly send it to an AI model for analysis. Whether it's a math problem, a chart, a code snippet, or a question on a webpage — just select the area and get your answer in seconds.
 
+It also features a **Form Solver** that can automatically scrape and solve text-based multiple choice questions. Currently supporting Microsoft Forms only.
+
 Answery is designed to be fast, minimal, and unobtrusive.
 
 ---
@@ -29,6 +31,7 @@ Answery is designed to be fast, minimal, and unobtrusive.
 
 - **🖼️ Area Capture** — Select any rectangular region on any webpage to capture and analyze.
 - **🤖 AI-Powered Analysis** — Powered by Google Gemini vision models (3 Pro, 3 Flash, 2.5 Pro, 2.5 Flash, 2.5 Flash Lite).
+- **📝 Form Solver** — Automatically scrape and solve text-based multiple choice questions. Optionally auto-select the correct answers on the page.
 - **⚡ Quick Capture Button** — A draggable floating button on every page for instant one-click capture.
 - **🥷 Stealth Mode** — Results appear nearly invisible and are only revealed on hover. Capture is triggered via keyboard shortcut only — no visible UI.
 - **📌 In-App Results** — Option to display AI responses directly inside the extension popup instead of as a floating overlay on the page.
@@ -96,6 +99,16 @@ Enable **"Stealth Mode"** in Settings for a completely discrete experience:
 - Adjust the **Popup Transparency** slider to control how invisible the response appears.
 - For a full discrete experience, combine stealth mode with the **In-App Results only** switch to display the response in the extension UI instead of as a floating overlay on the page.
 
+### Form Solver (Microsoft Forms only)
+
+1. Navigate to any **Microsoft Forms** quiz page.
+2. Open the Answery popup — a **"Solve Form"** button will appear automatically.
+3. Click **"Solve Form"** — the extension scrapes all text-based multiple choice questions and sends them to the AI.
+4. Answers are displayed in the popup or as a floating overlay on the page (depending on the **In-App Results Only** setting).
+5. **Optional:** Enable the **"Auto-select answers (beta)"** toggle to have the extension automatically click the correct options on the form.
+
+> **Note:** Questions containing images are automatically skipped.
+
 ---
 
 ## Prompt Examples
@@ -158,6 +171,7 @@ Answery/
 | **Popup Transparency** | How transparent the response popup is in Stealth Mode (0–100%). | 5% |
 | **In-App Results Only** | Show responses inside the extension popup instead of on the page. | Off |
 | **Result Display Time** | How long the floating response stays visible (in seconds). | 5 sec |
+| **Auto-select answers** | Automatically click the correct answers on Microsoft Forms after solving. | Off |
 
 ---
 
