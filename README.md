@@ -82,9 +82,17 @@ Answery requires a **Google Gemini API key** to function:
 4. Confirm the selection with the **✔** button (or cancel with **✖**).
 5. Wait for the AI response to appear as a floating popup on the page or in the extension UI.
 
+<p align="center">
+  <img src="screenshots/capture-demo.png" alt="Capture Demo" width="300">
+</p>
+
 ### Quick Capture Button
 
 Enable **"Quick Capture Button"** in Settings to show a floating, draggable button on every webpage. Click it to instantly start a capture without opening the extension.
+
+<p align="center">
+  <img src="screenshots/quick-capture-button.png" alt="Quick Capture Button" width="300">
+</p>
 
 ### Keyboard Shortcut
 
@@ -109,6 +117,10 @@ Enable **"Stealth Mode"** in Settings for a completely discrete experience:
 
 > **Note:** Questions containing images are automatically skipped.
 
+<p align="center">
+  <img src="screenshots/form-solver.png" alt="Form Solver" width="350">
+</p>
+
 ---
 
 ## Prompt Examples
@@ -125,6 +137,104 @@ Customize the **"Custom Instructions"** field to tailor how the AI responds. Her
 | **Proofreading** | `Check this text for grammar or spelling errors and suggest corrections.` |
 
 > **Note:** If no custom instruction is set, the default prompt is: *"Analyze the content in this image and provide a clear answer."*
+
+### 📋 Recommended Prompt for Quizzes / Forms
+
+This is our recommended prompt when using Answery to solve quizzes or forms. Pick the version in your preferred language:
+
+<table>
+<tr>
+<th>🇮🇹 Italiano</th>
+<th>🇬🇧 English</th>
+</tr>
+<tr>
+<td>
+
+```
+Analizza l'immagine. Contiene una domanda
+con delle possibili risposte.
+
+ISTRUZIONI:
+1. Identifica la domanda
+2. Individua la/le risposta/e corretta/e
+3. Rispondi SOLO con il formato indicato
+   sotto, nessun commento aggiuntivo
+
+FORMATO (risposta singola):
+✅ [numero o testo della risposta]
+
+FORMATO (risposte multiple):
+✅ [prima risposta corretta]
+✅ [seconda risposta corretta]
+✅ [terza risposta corretta]
+
+REGOLE:
+- Se le risposte sono numerate o con
+  lettere, usa il numero/lettera +
+  testo breve
+- Se il testo è lungo, riporta solo le
+  prime parole sufficienti a identificarla
+- Non aggiungere spiegazioni, commenti
+  o introduzioni
+- Usa SOLO il formato con ✅ per ogni
+  risposta corretta
+```
+
+</td>
+<td>
+
+```
+Analyze the image. It contains a question
+with possible answers.
+
+INSTRUCTIONS:
+1. Identify the question
+2. Determine the correct answer(s)
+3. Respond ONLY using the format indicated
+   below, with no additional comments
+
+FORMAT (single answer):
+✅ [number or text of the answer]
+
+FORMAT (multiple answers):
+✅ [first correct answer]
+✅ [second correct answer]
+✅ [third correct answer]
+
+RULES:
+- If the answers are numbered or labeled
+  with letters, use the number/letter +
+  a short text
+- If the text is long, include only the
+  first words necessary to identify it
+- Do not add explanations, comments,
+  or introductions
+- Use ONLY the format with ✅ for each
+  correct answer
+```
+
+</td>
+</tr>
+</table>
+
+> **Tip:** Paste one of these into the **Custom Instructions** field in Settings to get clean, formatted answers when analyzing quiz screenshots.
+
+---
+
+## Settings Reference
+
+| Setting | Description | Default |
+|---|---|---|
+| **AI Provider** | Which AI provider to use for analysis. | Google Gemini |
+| **Gemini Model** | The specific Gemini model to query. | Gemini 3 Flash Preview |
+| **API Key** | Your personal Google Gemini API key. | — |
+| **Custom Instructions** | A default prompt sent with every capture. | *Analyze the content...* |
+| **Quick Capture Button** | Show a floating capture button on web pages. | Off |
+| **Stealth Mode** | Hide all visible UI; capture via shortcut only. | Off |
+| **Popup Transparency** | How transparent the response popup is in Stealth Mode (0–100%). | 5% |
+| **In-App Results Only** | Show responses inside the extension popup instead of on the page. | Off |
+| **Result Display Time** | How long the floating response stays visible (in seconds). | 5 sec |
+| **Auto-select answers** | Automatically click the correct answers on Microsoft Forms after solving. | Off |
 
 ---
 
@@ -155,23 +265,6 @@ Answery/
 | **`content.js`** | Injected into web pages. Manages the screen selection overlay, capture confirmation, and floating response popups. |
 | **`background.js`** | Service worker. Captures the visible tab screenshot, communicates with the Gemini API, and manages the notification badge. |
 | **`content.style.css`** | Styles for all on-page elements (overlay, selection rectangle, confirm buttons, response popup, quick capture button). |
-
----
-
-## Settings Reference
-
-| Setting | Description | Default |
-|---|---|---|
-| **AI Provider** | Which AI provider to use for analysis. | Google Gemini |
-| **Gemini Model** | The specific Gemini model to query. | Gemini 3 Flash Preview |
-| **API Key** | Your personal Google Gemini API key. | — |
-| **Custom Instructions** | A default prompt sent with every capture. | *Analyze the content...* |
-| **Quick Capture Button** | Show a floating capture button on web pages. | Off |
-| **Stealth Mode** | Hide all visible UI; capture via shortcut only. | Off |
-| **Popup Transparency** | How transparent the response popup is in Stealth Mode (0–100%). | 5% |
-| **In-App Results Only** | Show responses inside the extension popup instead of on the page. | Off |
-| **Result Display Time** | How long the floating response stays visible (in seconds). | 5 sec |
-| **Auto-select answers** | Automatically click the correct answers on Microsoft Forms after solving. | Off |
 
 ---
 
