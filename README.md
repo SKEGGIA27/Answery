@@ -107,6 +107,21 @@ Enable **"Stealth Mode"** in Settings for a completely discrete experience:
 - Adjust the **Popup Transparency** slider to control how invisible the response appears.
 - For a full discrete experience, combine stealth mode with the **In-App Results only** switch to display the response in the extension UI instead of as a floating overlay on the page.
 
+<table>
+<tr>
+<td align="center">
+  <img src="screenshots/stealth-mode.png" alt="Stealth Mode" width="300"><br>
+  <em>Stealth Mode with popup transparency set to 80%. Hovering over the popup reveals it fully. Increase the percentage to make it even less visible.</em>
+</td>
+<td align="center">
+  <img src="screenshots/stealth-mode-inapp.png" alt="Stealth Mode In-App Results" width="300"><br>
+  <em>Stealth Mode with "In-App Results Only" enabled — the response is shown inside the extension popup, with no floating overlay on the page.</em>
+</td>
+</tr>
+</table>
+
+> **<img src="screenshots/notification.png" width="20" style="vertical-align: middle;"> Tip:** When **"In-App Results Only"** is enabled, a red notification badge will appear on the Answery extension icon to let you know that a response is ready. Simply open the extension to view it.
+
 ### Form Solver (Microsoft Forms only)
 
 1. Navigate to any **Microsoft Forms** quiz page.
