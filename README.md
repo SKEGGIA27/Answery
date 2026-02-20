@@ -128,7 +128,7 @@ Enable **"Stealth Mode"** in Settings for a completely discrete experience:
 ### Form Solver (Microsoft Forms only)
 
 1. Navigate to any **Microsoft Forms** quiz page.
-2. Open the Answery popup — a **"Solve Form"** button will appear automatically.
+2. Open Answery — a **"Solve Form"** button will appear automatically.
 3. Click **"Solve Form"** — the extension scrapes all text-based multiple choice questions and sends them to the AI.
 4. Answers are displayed in the popup or as a floating overlay on the page (depending on the **In-App Results Only** setting).
 5. **Optional:** Enable the **"Auto-select answers (beta)"** toggle to have the extension automatically click the correct options on the form.
