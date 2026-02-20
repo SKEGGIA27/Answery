@@ -26,6 +26,7 @@ It also features a **Form Solver** that can automatically scrape and solve text-
 Answery is designed to be fast, minimal, and unobtrusive.
 
 ---
+<br>
 
 ## Features
 
@@ -41,6 +42,7 @@ Answery is designed to be fast, minimal, and unobtrusive.
 - **🔒 Local Storage** — Your API key and settings are stored locally in the browser. Nothing is sent to external servers except the image data to the Gemini API.
 
 ---
+<br>
 
 ## Installation
 
@@ -71,6 +73,7 @@ Answery requires a **Google Gemini API key** to function:
 3. Your key is saved locally and is never shared with anyone other than Google's API.
 
 ---
+<br>
 
 ## How to Use
 
@@ -137,6 +140,7 @@ Enable **"Stealth Mode"** in Settings for a completely discrete experience:
 </p>
 
 ---
+<br>
 
 ## Prompt Examples
 
@@ -235,6 +239,7 @@ RULES:
 > **Tip:** Paste one of these into the **Custom Instructions** field in Settings to get clean, formatted answers when analyzing quiz screenshots.
 
 ---
+<br>
 
 ## Settings Reference
 
@@ -252,6 +257,7 @@ RULES:
 | **Auto-select answers** | Automatically click the correct answers on Microsoft Forms after solving. | Off |
 
 ---
+<br>
 
 ## Project Structure
 
@@ -282,6 +288,7 @@ Answery/
 | **`content.style.css`** | Styles for all on-page elements (overlay, selection rectangle, confirm buttons, response popup, quick capture button). |
 
 ---
+<br>
 
 ## Privacy & Security
 
@@ -291,6 +298,7 @@ Answery/
 - **Open source.** The entire source code is available for review in this repository.
 
 ---
+<br>
 
 ## Technologies
 
@@ -301,6 +309,7 @@ Answery/
 - **CSS3** with glassmorphism design
 
 ---
+<br>
 
 ## Contributing
 
@@ -313,6 +322,7 @@ Contributions are welcome! If you'd like to improve Answery:
 5. Open a **Pull Request**.
 
 ---
+<br>
 
 ## License
 
