@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Answery",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Capture any area of your screen and get instant AI-powered answers.",
   "permissions": [
     "activeTab",
