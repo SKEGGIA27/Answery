@@ -184,9 +184,14 @@ async function analyzeImage(payload, sendResponse) {
 
       const data = await response.json();
 
+
       if (!response.ok) {
-        console.error('[Background] Gemini Error Data:', data);
-        throw new Error(data.error?.message || `Gemini Error ${response.status}`);
+        console.error('[Background] Gemini Form Error:', data);
+        let errorMsg = data.error?.message || `Gemini Error ${response.status}`;
+        if (errorMsg.includes("You exceeded your current quota") || errorMsg.includes("Quota exceeded for metric")) {
+          errorMsg = `Quota exceeded for ${selectedModel}, switch to another model!`;
+        }
+        throw new Error(errorMsg);
       }
 
       resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response text from Gemini.";
@@ -251,7 +256,11 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
 
     if (!response.ok) {
       console.error('[Background] Gemini Form Error:', data);
-      throw new Error(data.error?.message || `Gemini Error ${response.status}`);
+      let errorMsg = data.error?.message || `Gemini Error ${response.status}`;
+      if (errorMsg.includes("You exceeded your current quota") || errorMsg.includes("Quota exceeded for metric")) {
+        errorMsg = `Quota exceeded for ${selectedModel}, switch to another model!`;
+      }
+      throw new Error(errorMsg);
     }
 
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';

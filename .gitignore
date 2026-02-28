@@ -20,3 +20,6 @@ node_modules/
 
 # Source assets (not needed in the extension)
 icons/original.png
+
+# Code Runner
+tempCodeRunnerFile.js

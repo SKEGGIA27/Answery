@@ -81,11 +81,15 @@
             <label for="geminiModelSelect">Gemini Model</label>
             <div class="select-wrapper">
               <select id="geminiModelSelect">
-                <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
-                <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                <optgroup label="Optimized for Speed">
+                  <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                </optgroup>
+                <optgroup label="Optimized for Accuracy">
+                  <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                </optgroup>
               </select>
             </div>
           </div>
