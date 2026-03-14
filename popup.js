@@ -79,6 +79,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ===== Check for Updates =====
+  const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
+  const updateResult = document.getElementById('updateResult');
+
+  function compareVersions(v1, v2) {
+    const parts1 = v1.split('.').map(Number);
+    const parts2 = v2.split('.').map(Number);
+    const len = Math.max(parts1.length, parts2.length);
+    for (let i = 0; i < len; i++) {
+      const a = parts1[i] || 0;
+      const b = parts2[i] || 0;
+      if (a < b) return -1;
+      if (a > b) return 1;
+    }
+    return 0;
+  }
+
+  if (checkUpdatesBtn) {
+
+    // Check for updates
+    checkUpdatesBtn.addEventListener('click', async () => {
+      // Set loading state
+      checkUpdatesBtn.disabled = true;
+      checkUpdatesBtn.classList.add('checking');
+      const originalText = checkUpdatesBtn.innerHTML;
+      const svgIcon = checkUpdatesBtn.querySelector('.update-icon').outerHTML;
+      checkUpdatesBtn.innerHTML = svgIcon + ' Checking...';
+      checkUpdatesBtn.classList.add('checking');
+      updateResult.style.display = 'none';
+      updateResult.className = 'update-result';
+
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/SKEGGIA27/Answery/main/manifest.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Manifest non trovato su GitHub');
+
+        const remoteManifest = await response.json();
+
+        const latestVersion = remoteManifest.version;
+        const currentVersion = chrome.runtime.getManifest().version;
+        const repoUrl = 'https://github.com/SKEGGIA27/Answery';
+
+        if (compareVersions(currentVersion, latestVersion) !== 0) {
+          updateResult.innerHTML = `A new version is available! <a href="${repoUrl}" target="_blank">Download (v${latestVersion})</a><br>Follow the instructions in the README to update.`;
+          updateResult.className = 'update-result has-update';
+        } else {
+          updateResult.textContent = `You're on the latest version (v${currentVersion})`;
+          updateResult.className = 'update-result up-to-date';
+        }
+      } catch (err) {
+        updateResult.textContent = 'Unable to check for updates. Try again later.';
+        updateResult.className = 'update-result';
+        updateResult.style.color = 'rgba(0,0,0,0.45)';
+      }
+
+      updateResult.style.display = 'block';
+      checkUpdatesBtn.disabled = false;
+      checkUpdatesBtn.classList.remove('checking');
+      checkUpdatesBtn.innerHTML = originalText;
+    });
+  }
+
   // Load saved settings
   chrome.storage.local.get(['model', 'geminiModel', 'apiKey', 'presetMessage', 'duration', 'quickButton', 'stealthMode', 'hidePopup', 'stealthTransparency', 'latestResponse'], (result) => {
     if (result.model) modelSelect.value = result.model;
@@ -134,32 +195,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const autoClick = autoClickCheckbox ? autoClickCheckbox.checked : false;
 
-      chrome.runtime.sendMessage({ action: 'SOLVE_FORM', autoClick: autoClick }, (response) => {
-        if (chrome.runtime.lastError) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        if (!activeTab) {
           solveFormBtn.disabled = false;
           solveFormBtn.innerHTML = 'Solve Form';
-          statusMsg.textContent = 'Error: ' + chrome.runtime.lastError.message;
+          statusMsg.textContent = 'Error: No active tab';
           return;
         }
 
-        if (response && response.success) {
-          if (response.showInPopup) {
-            // Show inside extension popup
+        chrome.tabs.sendMessage(activeTab.id, { action: 'RELAY_SOLVE_FORM', autoClick: autoClick }, (response) => {
+          if (chrome.runtime.lastError) {
             solveFormBtn.disabled = false;
             solveFormBtn.innerHTML = 'Solve Form';
-            showGuiResponse(response.text);
-            statusMsg.textContent = autoClick ? 'Answers applied!' : 'Answers ready';
-            setTimeout(() => { statusMsg.textContent = ''; }, 3000);
-          } else {
-            // Response shown on page — close popup (like capture mode)
-            window.close();
+            statusMsg.textContent = 'Error: ' + chrome.runtime.lastError.message;
+            return;
           }
-        } else {
-          solveFormBtn.disabled = false;
-          solveFormBtn.innerHTML = 'Solve Form';
-          statusMsg.textContent = response ? response.error : 'Unknown error';
-          setTimeout(() => { statusMsg.textContent = ''; }, 5000);
-        }
+
+          if (response && response.success) {
+            if (response.showInPopup) {
+              // Show inside extension popup
+              solveFormBtn.disabled = false;
+              solveFormBtn.innerHTML = 'Solve Form';
+              showGuiResponse(response.text);
+              statusMsg.textContent = autoClick ? 'Answers applied!' : 'Answers ready';
+              setTimeout(() => { statusMsg.textContent = ''; }, 3000);
+            } else {
+              // Response shown on page — close popup
+              window.close();
+            }
+          } else {
+            solveFormBtn.disabled = false;
+            solveFormBtn.innerHTML = 'Solve Form';
+            statusMsg.textContent = response ? response.error : 'Unknown error';
+            setTimeout(() => { statusMsg.textContent = ''; }, 5000);
+          }
+        });
       });
     });
   }

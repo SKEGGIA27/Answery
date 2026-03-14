@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.1.0-6c5ce7?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.0-6c5ce7?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/manifest-v3-a29bfe?style=flat-square" alt="Manifest V3">
   <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=flat-square" alt="Google Gemini">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
@@ -71,6 +71,25 @@ Answery requires a **Google Gemini API key** to function:
 1. Visit [Google AI Studio](https://aistudio.google.com/apikey) and create a free API key.
 2. Open the Answery popup, expand **Settings**, and paste your key in the **API Key** field.
 3. Your key is saved locally and is never shared with anyone other than Google's API.
+
+### Updating the Extension
+
+When a new version is available, you can update without losing any of your saved data (API key, settings). 
+
+**Method A: If you installed Answery via Git Clone (Recommended)**
+1. Open a terminal inside your existing `Answery` folder.
+2. Run `git pull` to download the latest changes.
+
+**Method B: If you installed Answery via Source Code (ZIP)**
+1. Download and extract the new source code ZIP.
+2. **Overwrite** the files inside your existing `Answery` folder with the new ones. Do *not* delete the old folder or move it to a different location.
+
+**Final Step (Both Methods):**
+Go to `chrome://extensions` and click the **Reload** (refresh) icon on the Answery card. Chrome will load the new code while keeping all your data intact.
+
+<p align="center">
+  <img src="screenshots/refresh_extension.png" alt="Refresh Extension" width="450">
+</p>
 
 ---
 <br>

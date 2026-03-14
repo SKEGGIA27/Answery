@@ -31,6 +31,25 @@ function initializeContentScript() {
             applyAnswers(request.answers);
             sendResponse({ success: true });
             return true;
+        } else if (request.action === 'RELAY_SOLVE_FORM') {
+            const questions = scrapeFormQuestions();
+            if (questions.length === 0) {
+                sendResponse({ success: false, error: 'No text questions found on this form' });
+                return true;
+            }
+
+            chrome.runtime.sendMessage({ 
+                action: 'ANALYZE_FORM_QUESTIONS', 
+                questions: questions, 
+                autoClick: request.autoClick 
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    sendResponse({ success: false, error: chrome.runtime.lastError.message });
+                } else {
+                    sendResponse(response || { success: false, error: 'Empty response' });
+                }
+            });
+            return true;
         }
     });
 
@@ -345,7 +364,13 @@ function initializeContentScript() {
 
                 } else {
                     console.error('[Content] Analysis failed:', response.error);
-                    showResponsePopup(`Error: ${response.error}`, 10);
+                    if (settings.hidePopup) {
+                        chrome.storage.local.set({ latestResponse: 'Error: ' + response.error }, () => {
+                            chrome.runtime.sendMessage({ action: 'SET_BADGE' });
+                        });
+                    } else {
+                        showResponsePopup(`Error: ${response.error}`, 10);
+                    }
                 }
             });
         });

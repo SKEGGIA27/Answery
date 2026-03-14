@@ -93,32 +93,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     });
     return true;
-  } else if (request.action === 'SOLVE_FORM') {
-    // Orchestrate: scrape → AI → (optionally) auto-click
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      if (!activeTab) {
-        sendResponse({ success: false, error: 'No active tab' });
-        return;
-      }
-
-      // Step 1: Scrape questions from the page
-      chrome.tabs.sendMessage(activeTab.id, { action: 'SCRAPE_FORM' }, (scrapeResponse) => {
-        if (chrome.runtime.lastError || !scrapeResponse || !scrapeResponse.questions) {
-          sendResponse({ success: false, error: 'Failed to scrape form questions' });
-          return;
-        }
-
-        const questions = scrapeResponse.questions;
-        if (questions.length === 0) {
-          sendResponse({ success: false, error: 'No text questions found on this form' });
-          return;
-        }
-
-        // Step 2: Send to AI
-        analyzeFormQuestions(questions, request.autoClick, activeTab.id, sendResponse);
-      });
-    });
+  } else if (request.action === 'ANALYZE_FORM_QUESTIONS') {
+    const tabId = sender.tab ? sender.tab.id : null;
+    if (!tabId) {
+      sendResponse({ success: false, error: 'No active tab ID found' });
+      return true;
+    }
+    analyzeFormQuestions(request.questions, request.autoClick, tabId, sendResponse);
     return true;
   }
 });
@@ -178,6 +159,7 @@ async function analyzeImage(payload, sendResponse) {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
         body: JSON.stringify(body)
       });
 
@@ -249,6 +231,7 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
       body: JSON.stringify(body)
     });
 
@@ -310,7 +293,7 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
     if (displaySettings.hidePopup) {
       // Show inside extension popup
       chrome.storage.local.set({ latestResponse: formattedText.trim() });
-      chrome.runtime.sendMessage({ action: 'SET_BADGE' });
+      drawBadgeIcon(true);
       sendResponse({ success: true, text: formattedText.trim(), showInPopup: true });
     } else {
       // Show as floating popup on the page (like capture mode)
@@ -325,6 +308,19 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
 
   } catch (error) {
     console.error('[Background] Form Analysis Error:', error);
+    try {
+      const displaySettings = await chrome.storage.local.get(['hidePopup', 'duration']);
+      if (displaySettings.hidePopup) {
+        chrome.storage.local.set({ latestResponse: 'Error: ' + error.message });
+        drawBadgeIcon(true);
+      } else {
+        chrome.tabs.sendMessage(tabId, {
+          action: 'SHOW_RESPONSE',
+          text: 'Error: ' + error.message,
+          duration: displaySettings.duration || 10
+        });
+      }
+    } catch(e) {}
     sendResponse({ success: false, error: error.message });
   }
 }
