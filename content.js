@@ -99,10 +99,13 @@ function initializeContentScript() {
             });
 
             if (options.length > 0) {
+                // Detect question type: checkbox = multiple answers, radio = single
+                const hasCheckbox = item.querySelector('input[type="checkbox"]') !== null;
                 questions.push({
                     index: index,
                     text: questionText,
-                    options: options
+                    options: options,
+                    type: hasCheckbox ? 'multiple' : 'single'
                 });
             }
         });
@@ -112,25 +115,31 @@ function initializeContentScript() {
 
     function applyAnswers(answers) {
         const questionItems = document.querySelectorAll('[data-automation-id="questionItem"]');
+        let clickDelay = 0;
 
-        answers.forEach((answer, i) => {
-            setTimeout(() => {
-                const questionItem = questionItems[answer.questionIndex];
-                if (!questionItem) return;
+        answers.forEach((answer) => {
+            const questionItem = questionItems[answer.questionIndex];
+            if (!questionItem) return;
 
-                const choiceItems = questionItem.querySelectorAll('[data-automation-id="choiceItem"]');
-                const targetChoice = choiceItems[answer.optionIndex];
+            const choiceItems = questionItem.querySelectorAll('[data-automation-id="choiceItem"]');
+            // Support both single optionIndex and array optionIndices
+            const indices = answer.optionIndices || [answer.optionIndex];
+
+            indices.forEach((optIdx) => {
+                const targetChoice = choiceItems[optIdx];
                 if (!targetChoice) return;
 
-                // Click the input or label
-                const input = targetChoice.querySelector('input[type="radio"], input[type="checkbox"]');
-                if (input) {
-                    input.click();
-                } else {
-                    const label = targetChoice.querySelector('label');
-                    if (label) label.click();
-                }
-            }, i * 100); // 100ms delay between each click
+                setTimeout(() => {
+                    const input = targetChoice.querySelector('input[type="radio"], input[type="checkbox"]');
+                    if (input) {
+                        input.click();
+                    } else {
+                        const label = targetChoice.querySelector('label');
+                        if (label) label.click();
+                    }
+                }, clickDelay * 100);
+                clickDelay++;
+            });
         });
     }
 
@@ -342,7 +351,7 @@ function initializeContentScript() {
                 model: settings.model || 'gemini',
                 geminiModel: settings.geminiModel,
                 apiKey: settings.apiKey,
-                prompt: settings.presetMessage || "Analyze the content in this image and provide a clear answer."
+                prompt: settings.presetMessage || "Analyze the image and return ONLY the text of the correct options. No greetings, no explanations. If there are multiple correct answers, separate them with commas."
             };
 
             chrome.runtime.sendMessage({ action: 'ANALYZE_IMAGE', payload: payload }, (response) => {

@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const captureBtn = document.getElementById('captureBtn');
   const statusMsg = document.getElementById('status');
   const settingsToggle = document.getElementById('settingsToggle');
+  const missingPromptAlert = document.getElementById('missingPromptAlert');
   const settingsContent = document.getElementById('settingsContent');
 
   const hidePopupCheckbox = document.getElementById('hidePopup');
@@ -152,6 +153,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (result.apiKey) apiKeyInput.value = result.apiKey;
     if (result.presetMessage) presetMessageInput.value = result.presetMessage;
+    
+    if (missingPromptAlert) {
+      missingPromptAlert.style.display = presetMessageInput.value.trim() ? 'none' : 'block';
+    }
     if (result.duration) durationInput.value = result.duration;
     if (result.quickButton) quickButtonCheckbox.checked = result.quickButton;
     if (result.stealthMode) stealthModeCheckbox.checked = result.stealthMode;
@@ -285,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
     statusMsg.textContent = "Saving...";
 
     debounceTimer = setTimeout(() => {
+      if (missingPromptAlert) {
+        missingPromptAlert.style.display = presetMessageInput.value.trim() ? 'none' : 'block';
+      }
+
       const settings = {
         model: modelSelect.value,
         geminiModel: geminiModelSelect.value,
@@ -303,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
           statusMsg.textContent = "";
         }, 1500);
       });
-    }, 500);
+    }, 250);
   }
 
   // Attach auto-save listeners

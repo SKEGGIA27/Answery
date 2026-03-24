@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.0-6c5ce7?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.1-6c5ce7?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/manifest-v3-a29bfe?style=flat-square" alt="Manifest V3">
   <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=flat-square" alt="Google Gemini">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
@@ -174,9 +174,9 @@ Customize the **"Custom Instructions"** field to tailor how the AI responds. Her
 | **Summarization** | `Summarize the content visible in this image in 2-3 sentences.` |
 | **Proofreading** | `Check this text for grammar or spelling errors and suggest corrections.` |
 
-> **Note:** If no custom instruction is set, the default prompt is: *"Analyze the content in this image and provide a clear answer."*
+> **Note:** If no custom instruction is set, the default prompt is: *"Analyze the image and return ONLY the text of the correct options. No greetings, no explanations. If there are multiple correct answers, separate them with commas."*
 
-### 📋 Recommended Prompt for Quizzes / Forms
+### ‼️ Recommended Prompt for Quizzes / Forms
 
 This is our recommended prompt when using Answery to solve quizzes or forms. Pick the version in your preferred language:
 

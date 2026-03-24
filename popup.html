@@ -61,6 +61,7 @@
           <div id="guiResponseText" class="response-text"></div>
         </div>
 
+        <div id="missingPromptAlert" style="color: #ff4d4d; font-size: 12px; font-style: italic; text-align: center; margin-bottom: -8px; display: none;">Custom instructions missing. Configure them!</div>
         <button id="settingsToggle" class="settings-toggle">
           <span>Settings</span>
           <span class="arrow">▼</span>
@@ -114,6 +115,7 @@
             <label for="presetMessage">Custom Instructions</label>
             <textarea id="presetMessage" rows="2"
               placeholder="e.g. Tell me the correct answer for this question"></textarea>
+              <p class="setting-desc">Check the "Recommended Prompts" section in the documentation</p>
           </div>
 
           <div class="settings-group" style="flex-direction: row; align-items: center; justify-content: space-between;">

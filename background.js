@@ -204,20 +204,22 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
     }
 
     // Build text prompt from scraped questions
-    let promptText = 'You are given a list of multiple-choice questions. For each question, identify the correct answer.\n\n';
+    let promptText = 'You are given a list of multiple-choice questions. For each question, identify the correct answer(s).\n\n';
     promptText += 'IMPORTANT: Respond ONLY with a valid JSON array. No explanation, no markdown, no extra text.\n';
-    promptText += 'Format: [{"question": <question_index>, "answer": <option_index>}]\n';
-    promptText += 'Where question_index is the question number (starting from 0) and answer is the 0-based index of the correct option.\n\n';
+    promptText += 'Format: [{"question": <question_index>, "answer": <option_index_or_array>}]\n';
+    promptText += 'Where question_index is the question number (starting from 0).\n';
+    promptText += 'If the question allows MULTIPLE correct answers, "answer" must be an array of 0-based indices, e.g. [1, 3].\n';
+    promptText += 'If the question allows only ONE correct answer, "answer" must be a single 0-based index, e.g. 2.\n\n';
 
     questions.forEach((q, i) => {
-      promptText += `Question ${i} : ${q.text}\n`;
+      promptText += `Question ${i} (${q.type === 'multiple' ? 'MULTIPLE answers allowed' : 'single answer'}): ${q.text}\n`;
       q.options.forEach((opt, j) => {
         promptText += `  ${j}) ${opt.text}\n`;
       });
       promptText += '\n';
     });
 
-    promptText += '\nRespond ONLY with the JSON array. Example: [{"question":0,"answer":1},{"question":1,"answer":0}]';
+    promptText += '\nRespond ONLY with the JSON array. Example: [{"question":0,"answer":1},{"question":1,"answer":[0,3]}]';
 
     const selectedModel = settings.geminiModel || 'gemini-3-flash-preview';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
@@ -268,17 +270,22 @@ async function analyzeFormQuestions(questions, autoClick, tabId, sendResponse) {
     aiAnswers.forEach((a) => {
       const q = questions[a.question];
       if (q) {
-        const opt = q.options[a.answer];
-        formattedText += `Q${a.question + 1}: ${q.text}\n→ ${opt ? opt.text : 'Unknown'}\n\n`;
+        const indices = Array.isArray(a.answer) ? a.answer : [a.answer];
+        const optTexts = indices.map(idx => {
+          const opt = q.options[idx];
+          return opt ? opt.text : 'Unknown';
+        });
+        formattedText += `Q${a.question + 1}: ${q.text}\n→ ${optTexts.join(', ')}\n\n`;
       }
     });
 
     // Build answers array for auto-click (map AI answer indices to DOM indices)
     const clickData = aiAnswers.map((a) => {
       const q = questions[a.question];
+      const indices = Array.isArray(a.answer) ? a.answer : [a.answer];
       return {
         questionIndex: q ? q.index : -1,
-        optionIndex: a.answer
+        optionIndices: indices
       };
     }).filter(a => a.questionIndex >= 0);
 
