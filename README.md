@@ -17,6 +17,14 @@
 
 ---
 
+> **⚠️ Disclaimer / Avviso Legale**
+>
+> 🇮🇹 L'utilizzo di Answery è soggetto ai [**Termini d'Uso**](TERMS.md). L'utente è l'unico responsabile dell'uso che fa del Software. L'autore non è responsabile per usi impropri, illeciti o in violazione di regolamenti accademici o istituzionali.
+>
+> 🇬🇧 Use of Answery is subject to the [**Terms of Use**](TERMS.md). The user is solely responsible for how they use the Software. The author is not liable for improper, illegal, or unauthorized use, including violations of academic or institutional policies.
+
+---
+
 ## Overview
 
 **Answery** is a Chrome extension that lets you select any region of your screen, capture it, and instantly send it to an AI model for analysis. Whether it's a math problem, a chart, a code snippet, or a question on a webpage — just select the area and get your answer in seconds.
@@ -294,6 +302,8 @@ Answery/
 │   ├── icon32.png         # Toolbar icon (32x32)
 │   ├── icon48.png         # Extension page icon (48x48)
 │   └── icon128.png        # Chrome Web Store icon (128x128)
+├── TERMS.md               # Terms of Use (IT + EN)
+├── LICENSE                 # MIT License
 └── README.md
 ```
 
