@@ -57,7 +57,7 @@ function initializeContentScript() {
 
     function detectForm() {
         const url = window.location.href.toLowerCase();
-        return url.includes('forms.office.com') || url.includes('forms.microsoft.com');
+        return url.includes('forms.office.com') || url.includes('forms.microsoft.com') || url.includes('forms.cloud.microsoft');
     }
 
     function scrapeFormQuestions() {

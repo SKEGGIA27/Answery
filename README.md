@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.1-6c5ce7?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.2.2-6c5ce7?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/manifest-v3-a29bfe?style=flat-square" alt="Manifest V3">
   <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=flat-square" alt="Google Gemini">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
